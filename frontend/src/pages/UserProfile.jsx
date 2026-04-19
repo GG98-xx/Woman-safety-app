@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getProfile } from '../api/api';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
-import SOSButton from '../components/SOSButton';
+
 
 export default function UserProfile() {
     const { user, loginUser, token } = useAuth();
@@ -14,21 +14,21 @@ export default function UserProfile() {
     const [passwordForm, setPasswordForm] = useState({
         current_password: '', new_password: '', confirm_password: ''
     });
-    const [loading,   setLoading]   = useState(true);
-    const [saving,    setSaving]    = useState(false);
-    const [msg,       setMsg]       = useState('');
-    const [error,     setError]     = useState('');
+    const [loading,  setLoading]  = useState(true);
+    const [saving,   setSaving]   = useState(false);
+    const [msg,      setMsg]      = useState('');
+    const [error,    setError]    = useState('');
     const [activeTab, setActiveTab] = useState('profile');
 
     useEffect(() => {
         getProfile().then(res => {
             const u = res.data;
             setForm({
-                name:          u.name          || '',
-                email:         u.email         || '',
-                contact_no:    u.contact_no    || '',
+                name:         u.name         || '',
+                email:        u.email        || '',
+                contact_no:   u.contact_no   || '',
                 emerg_contact: u.emerg_contact || '',
-                department:    u.department    || '',
+                department:   u.department   || '',
             });
         }).catch(console.error)
         .finally(() => setLoading(false));
@@ -37,9 +37,10 @@ export default function UserProfile() {
     const handleSave = async (e) => {
         e.preventDefault();
         setSaving(true);
-        setError(''); setMsg('');
+        setError('');
+        setMsg('');
         try {
-            await axios.put(
+            const res = await axios.put(
                 `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/profile`,
                 form,
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -56,9 +57,11 @@ export default function UserProfile() {
     const handlePasswordChange = async (e) => {
         e.preventDefault();
         if (passwordForm.new_password !== passwordForm.confirm_password) {
-            setError('New passwords do not match!'); return;
+            setError('New passwords do not match!');
+            return;
         }
-        setSaving(true); setError('');
+        setSaving(true);
+        setError('');
         try {
             await axios.put(
                 `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/password`,
@@ -86,7 +89,7 @@ export default function UserProfile() {
     return (
         <div style={{ minHeight: '100vh', background: '#fff0f5' }}>
             <Navbar />
-            {user?.role === 'user' && <SOSButton />}
+
             <div className="page-container">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                     <h1 className="page-title">My Profile 👤</h1>
@@ -98,7 +101,7 @@ export default function UserProfile() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '24px', alignItems: 'start' }}>
 
-                    {/* Left card */}
+                    {/* Left — Avatar card */}
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
                         <div className="card" style={{ padding: '32px', textAlign: 'center' }}>
                             <motion.div style={{
@@ -113,16 +116,27 @@ export default function UserProfile() {
                                 transition={{ duration: 3, repeat: Infinity }}>
                                 {user?.name?.charAt(0).toUpperCase()}
                             </motion.div>
-                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1f2937', marginBottom: '4px' }}>{user?.name}</h3>
-                            <p style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '8px' }}>{user?.email}</p>
-                            <span style={{ background: '#fff0f5', color: '#ff4d88', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, border: '1px solid #ffb3cc' }}>
+                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1f2937', marginBottom: '4px' }}>
+                                {user?.name}
+                            </h3>
+                            <p style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '8px' }}>
+                                {user?.email}
+                            </p>
+                            <span style={{
+                                background: '#fff0f5', color: '#ff4d88',
+                                padding: '4px 14px', borderRadius: '20px',
+                                fontSize: '12px', fontWeight: 700,
+                                border: '1px solid #ffb3cc'
+                            }}>
                                 {user?.role?.toUpperCase()}
                             </span>
+
+                            {/* Nav */}
                             <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 {[
-                                    { id: 'profile',   label: '👤 Edit Profile'   },
-                                    { id: 'password',  label: '🔒 Change Password' },
-                                    { id: 'emergency', label: '🆘 Emergency Info'  },
+                                    { id: 'profile',  label: '👤 Edit Profile'  },
+                                    { id: 'password', label: '🔒 Change Password' },
+                                    { id: 'emergency', label: '🆘 Emergency Info' },
                                 ].map(tab => (
                                     <motion.button key={tab.id}
                                         onClick={() => { setActiveTab(tab.id); setError(''); setMsg(''); }}
@@ -130,7 +144,8 @@ export default function UserProfile() {
                                             padding: '10px 14px', borderRadius: '10px', border: 'none',
                                             background: activeTab === tab.id ? 'linear-gradient(135deg, #ff4d88, #e6005c)' : '#fff0f5',
                                             color: activeTab === tab.id ? 'white' : '#6b7280',
-                                            fontWeight: 600, fontSize: '13px', cursor: 'pointer', fontFamily: 'Poppins', textAlign: 'left'
+                                            fontWeight: 600, fontSize: '13px', cursor: 'pointer',
+                                            fontFamily: 'Poppins', textAlign: 'left'
                                         }}
                                         whileHover={{ scale: 1.02 }}>
                                         {tab.label}
@@ -140,87 +155,116 @@ export default function UserProfile() {
                         </div>
                     </motion.div>
 
-                    {/* Right form */}
+                    {/* Right — Form */}
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+
+                        {/* Edit Profile */}
                         {activeTab === 'profile' && (
                             <div className="card" style={{ padding: '32px' }}>
                                 <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '24px' }}>Edit Profile</h3>
                                 <form onSubmit={handleSave}>
                                     <div className="input-group">
                                         <label>Full Name</label>
-                                        <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+                                        <input type="text" value={form.name}
+                                            onChange={e => setForm({ ...form, name: e.target.value })} required />
                                     </div>
                                     <div className="input-group">
                                         <label>Email Address</label>
-                                        <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+                                        <input type="email" value={form.email}
+                                            onChange={e => setForm({ ...form, email: e.target.value })} required />
                                     </div>
                                     <div className="input-group">
                                         <label>Contact Number</label>
-                                        <input type="tel" value={form.contact_no} onChange={e => setForm({ ...form, contact_no: e.target.value })} />
+                                        <input type="tel" placeholder="9876543210" value={form.contact_no}
+                                            onChange={e => setForm({ ...form, contact_no: e.target.value })} />
                                     </div>
                                     {user?.role === 'authority' && (
                                         <div className="input-group">
                                             <label>Department</label>
-                                            <input type="text" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
+                                            <input type="text" placeholder="e.g. Mumbai Police" value={form.department}
+                                                onChange={e => setForm({ ...form, department: e.target.value })} />
                                         </div>
                                     )}
-                                    <motion.button type="submit" className="btn-primary" disabled={saving} whileHover={{ scale: 1.02 }}>
+                                    <motion.button type="submit" className="btn-primary"
+                                        style={{ marginTop: '8px' }} disabled={saving}
+                                        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                                         {saving ? 'Saving...' : '💾 Save Changes'}
                                     </motion.button>
                                 </form>
                             </div>
                         )}
 
+                        {/* Change Password */}
                         {activeTab === 'password' && (
                             <div className="card" style={{ padding: '32px' }}>
                                 <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '24px' }}>Change Password</h3>
                                 <form onSubmit={handlePasswordChange}>
                                     <div className="input-group">
                                         <label>Current Password</label>
-                                        <input type="password" value={passwordForm.current_password} onChange={e => setPasswordForm({ ...passwordForm, current_password: e.target.value })} required />
+                                        <input type="password" placeholder="••••••••"
+                                            value={passwordForm.current_password}
+                                            onChange={e => setPasswordForm({ ...passwordForm, current_password: e.target.value })} required />
                                     </div>
                                     <div className="input-group">
                                         <label>New Password</label>
-                                        <input type="password" value={passwordForm.new_password} onChange={e => setPasswordForm({ ...passwordForm, new_password: e.target.value })} required />
+                                        <input type="password" placeholder="••••••••"
+                                            value={passwordForm.new_password}
+                                            onChange={e => setPasswordForm({ ...passwordForm, new_password: e.target.value })} required />
                                     </div>
                                     <div className="input-group">
                                         <label>Confirm New Password</label>
-                                        <input type="password" value={passwordForm.confirm_password} onChange={e => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })} required />
+                                        <input type="password" placeholder="••••••••"
+                                            value={passwordForm.confirm_password}
+                                            onChange={e => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })} required />
                                     </div>
-                                    <motion.button type="submit" className="btn-primary" disabled={saving} whileHover={{ scale: 1.02 }}>
+                                    <motion.button type="submit" className="btn-primary"
+                                        style={{ marginTop: '8px' }} disabled={saving}
+                                        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                                         {saving ? 'Changing...' : '🔒 Change Password'}
                                     </motion.button>
                                 </form>
                             </div>
                         )}
 
+                        {/* Emergency Info */}
                         {activeTab === 'emergency' && (
                             <div className="card" style={{ padding: '32px' }}>
                                 <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>🆘 Emergency Information</h3>
                                 <p style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '24px' }}>
-                                    This contact will be called when you press the SOS button.
+                                    This contact will be called automatically when you press the SOS button.
                                 </p>
                                 <form onSubmit={handleSave}>
                                     <div className="input-group">
                                         <label>Emergency Contact Number</label>
-                                        <input type="tel" placeholder="e.g. 9876543210"
+                                        <input type="tel" placeholder="e.g. 9876543210 (parent/friend)"
                                             value={form.emerg_contact}
                                             onChange={e => setForm({ ...form, emerg_contact: e.target.value })} />
                                     </div>
-                                    <div style={{ background: '#fff0f0', border: '1px solid #ffb3b3', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}>
-                                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#c62828', marginBottom: '8px' }}>🆘 When you press SOS:</div>
+
+                                    {/* SOS preview */}
+                                    <div style={{
+                                        background: '#fff0f0', border: '1px solid #ffb3b3',
+                                        borderRadius: '14px', padding: '16px', marginBottom: '20px'
+                                    }}>
+                                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#c62828', marginBottom: '8px' }}>
+                                            🆘 When you press SOS, it will:
+                                        </div>
                                         {[
                                             '📍 Share your live GPS location',
                                             '🚨 File an emergency incident report',
                                             '📢 Alert nearby community members',
-                                            `📞 Call: ${form.emerg_contact || 'your emergency contact'}`,
+                                            `📞 Open dialer to call: ${form.emerg_contact || 'your emergency contact'}`,
                                         ].map((item, i) => (
-                                            <div key={i} style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>{item}</div>
+                                            <div key={i} style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                                                {item}
+                                            </div>
                                         ))}
                                     </div>
+
                                     <motion.button type="submit" className="btn-primary"
                                         style={{ background: 'linear-gradient(135deg, #ff1744, #c62828)' }}
-                                        disabled={saving} whileHover={{ scale: 1.02 }}>
+                                        disabled={saving}
+                                        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                                         {saving ? 'Saving...' : '💾 Save Emergency Contact'}
                                     </motion.button>
                                 </form>
